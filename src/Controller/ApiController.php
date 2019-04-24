@@ -9,6 +9,10 @@ use Symfony\Component\HttpFoundation\Response;
 use App\Entity\User;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
+use App\Service\JwtManager;
+
+
+
 /**
  * @Route("/api", name="api_")
  */
@@ -32,10 +36,28 @@ class ApiController extends AbstractController
     /**
     * @Route("/test", name="test")
     */
-
-    public function test(Request $request)
+    public function test(JwtManager $jwtManager)
     {
-        return new Response(sprintf('Logged in as %s', $this->getUser()->getUsername()));
+        
+        return new Response($this->getUser()->getUsername());
+    }
+
+    /**
+    * @Route("/getJwt/{apiKey}", name="getjwt")
+    */
+    public function getJwt(JwtManager $jwtManager,$apiKey)
+    {
+        $this->getDoctrine()->getManager();
+        $user = $this->getDoctrine()
+        ->getRepository(User::class)
+        ->findBy(['apiKey' => $apiKey]);
+        if($user !== null){
+            $data = ["apiKey" => $user[0]->getApiKey()];
+            $token = $jwtManager->createJwt($data);
+        
+            return new Response($token);
+        }
+        
     }
 
 
