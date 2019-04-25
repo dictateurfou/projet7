@@ -67,11 +67,25 @@ class ApiController extends AbstractController
     {
         $repository = $this->getDoctrine()->getRepository(Product::class);
         $products = $repository->findAll();
-
         $jsonObject = $encoderJson->encodeData($products);
-
-        return $this->json($jsonObject);
-
+        return new Response($jsonObject);
     }
+
+
+    /**
+    *@Route("/getProductInfo/{productId}", name="getproductinfo")
+    */
+    public function getProductInfo(EncoderJson $encoderJson,$productId)
+    {
+        $repository = $this->getDoctrine()->getRepository(Product::class);
+        $product = $repository->find($productId);
+        if($product !== null){
+            $jsonObject = $encoderJson->encodeData($product);
+            return new Response($jsonObject);
+        }
+
+        return new Response(json_encode(["error" => "this product doesn't exist"]));
+    }
+
 
 }
