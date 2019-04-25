@@ -7,10 +7,10 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use App\Entity\User;
+use App\Entity\Product;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
-
 use App\Service\JwtManager;
-
+use App\Service\EncoderJson;
 
 
 /**
@@ -45,7 +45,7 @@ class ApiController extends AbstractController
     /**
     * @Route("/getJwt/{apiKey}", name="getjwt")
     */
-    public function getJwt(JwtManager $jwtManager,$apiKey)
+    public function getJwt(JwtManager $jwtManager, $apiKey)
     {
         $this->getDoctrine()->getManager();
         $user = $this->getDoctrine()
@@ -60,5 +60,18 @@ class ApiController extends AbstractController
         
     }
 
+    /**
+    *@Route("/getAllProducts", name="getallproduct")
+    */
+    public function getAllProducts(EncoderJson $encoderJson)
+    {
+        $repository = $this->getDoctrine()->getRepository(Product::class);
+        $products = $repository->findAll();
+
+        $jsonObject = $encoderJson->encodeData($products);
+
+        return $this->json($jsonObject);
+
+    }
 
 }
