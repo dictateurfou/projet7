@@ -12,6 +12,7 @@ use App\Entity\Client;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use App\Service\JwtManager;
 use App\Service\EncoderJson;
+use Symfony\Component\Serializer\SerializerInterface;
 
 
 /**
@@ -64,11 +65,13 @@ class ApiController extends AbstractController
     /**
     *@Route("/getAllProducts", name="getallproduct")
     */
-    public function getAllProducts(EncoderJson $encoderJson)
+    public function getAllProducts(SerializerInterface $serializer,EncoderJson $encoderJson)
     {
         $repository = $this->getDoctrine()->getRepository(Product::class);
         $products = $repository->findAll();
         $jsonObject = $encoderJson->encodeData($products);
+
+        
         return new Response($jsonObject);
     }
 

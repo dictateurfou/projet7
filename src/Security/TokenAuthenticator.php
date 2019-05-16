@@ -62,9 +62,8 @@ class TokenAuthenticator extends AbstractGuardAuthenticator
             return $this->em->getRepository(User::class)
             ->findOneBy(['apiKey' => $data["apiKey"]->getValue()]);
         }
-        else{
-            return;
-        }
+
+        return;
         
     }
 
