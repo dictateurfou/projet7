@@ -28,7 +28,11 @@ security:
         getjwt:
             pattern:  ^/api/getJwt
             anonymous: true
-            
+        
+        doc:
+            pattern:  ^/api/doc
+            anonymous: true
+
         api:
             pattern:   ^/api
             stateless: true
@@ -42,4 +46,5 @@ security:
         - { path: ^/api/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/api/getJwt, roles: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/api/register, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/api/doc, roles: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/api,       roles: IS_AUTHENTICATED_FULLY }
