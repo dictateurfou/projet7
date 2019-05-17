@@ -12,7 +12,7 @@ use App\Entity\Client;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use App\Service\JwtManager;
 use App\Service\EncoderJson;
-use Symfony\Component\Serializer\SerializerInterface;
+use JMS\Serializer\SerializerInterface;
 
 
 /**
@@ -37,6 +37,7 @@ class ApiController extends AbstractController
 
     /**
     * @Route("/test", name="test")
+    *
     */
     public function test(JwtManager $jwtManager)
     {
@@ -63,26 +64,26 @@ class ApiController extends AbstractController
     }
 
     /**
-    *@Route("/getAllProducts", name="getallproduct")
+    *@Route("/products", name="getallproduct", methods={"GET"})
     */
     public function getAllProducts(SerializerInterface $serializer,EncoderJson $encoderJson)
     {
         $repository = $this->getDoctrine()->getRepository(Product::class);
         $products = $repository->findAll();
-        $jsonObject = $encoderJson->encodeData($products);
-
+        $jsonObject = $serializer->serialize($products, 'json');
         
         return new Response($jsonObject);
     }
 
 
     /**
-    *@Route("/getProductInfo/{productId}", name="getproductinfo")
+    *@Route("/products/{id}", name="product_get", methods={"GET"})
+    *
     */
-    public function getProductInfo(EncoderJson $encoderJson,$productId)
+    public function getProductInfo(EncoderJson $encoderJson,$id)
     {
         $repository = $this->getDoctrine()->getRepository(Product::class);
-        $product = $repository->find($productId);
+        $product = $repository->find($id);
         if($product !== null){
             $jsonObject = $encoderJson->encodeData($product);
             return new Response($jsonObject);
@@ -93,7 +94,7 @@ class ApiController extends AbstractController
 
 
     /**
-    *@Route("/addClient", name="addclient", methods={"POST"})
+    *@Route("/clients", name="client_add", methods={"POST"})
     */
     public function addClient(Request $request)
     {
@@ -121,13 +122,12 @@ class ApiController extends AbstractController
 
 
     /**
-    *@Route("/removeClient/{id}", name="removeclient")
+    *@Route("/clients/{id}", name="client_delete", methods={"DELETE"})
     */
     public function removeClient(Request $request,$id)
     {
         $em = $this->getDoctrine()->getManager();
         $repository = $this->getDoctrine()->getRepository(Client::class);
-       
         $client = $repository->findOneBy(["api" => $this->getUser(), "id" => $id]);
         if(null === $client){
             return new Response(json_encode(["error" => "this user doesn't exist"]));
@@ -142,17 +142,18 @@ class ApiController extends AbstractController
 
 
     /**
-    *@Route("/getClients", name="getclient")
+    *@Route("/clients", name="client", methods={"GET"})
     */
-    public function getClients(EncoderJson $encoderJson)
+    public function getClients(SerializerInterface $serializer,EncoderJson $encoderJson)
     {
         $repository = $this->getDoctrine()->getRepository(Client::class);
         $clients = $repository->findBy(["api" => $this->getUser()]);
-        return new Response($encoderJson->encodeData($clients));
+        $jsonObject = $serializer->serialize($clients, 'json');
+        return new Response($jsonObject);
     }
 
     /**
-    *@Route("/clientInfo/{id}", name="clientinfo")
+    *@Route("/clients/{id}", name="client_get" , methods={"GET"})
     */
     public function clientInfo(EncoderJson $encoderJson,$id)
     {
@@ -161,7 +162,8 @@ class ApiController extends AbstractController
         if(null === $client){
             return new Response(json_encode(["error" => "user doesn't exist"]));
         }
-        return new Response($encoderJson->encodeData($client[0]));
+
+        return new Response($encoderJson->encodeData($client));
     }
 
 }

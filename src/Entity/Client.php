@@ -3,10 +3,19 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Hateoas\Configuration\Annotation as Hateoas;
 
 /**
- * @ORM\Entity(repositoryClass="App\Repository\ClientRepository")
- */
+* @ORM\Entity(repositoryClass="App\Repository\ClientRepository")
+*
+* @Hateoas\Relation(
+*      "self",
+*      href = @Hateoas\Route(
+*          "api_client_get",
+*          parameters = { "id" = "expr(object.getId())" }
+*      )
+* )
+*/
 class Client
 {
     /**
