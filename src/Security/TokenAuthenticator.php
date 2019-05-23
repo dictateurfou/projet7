@@ -19,7 +19,7 @@ class TokenAuthenticator extends AbstractGuardAuthenticator
     private $em;
     private $jwtManager;
 
-    public function __construct(EntityManagerInterface $em,JwtManager $jwtManager)
+    public function __construct(EntityManagerInterface $em, JwtManager $jwtManager)
     {
         $this->jwtManager = $jwtManager;
         $this->em = $em;
@@ -32,7 +32,6 @@ class TokenAuthenticator extends AbstractGuardAuthenticator
      */
     public function supports(Request $request)
     {
-    
         return $request->headers->has('Authorization') && 0 === strpos($request->headers->get('Authorization'), 'Bearer ');
     }
 
@@ -56,7 +55,7 @@ class TokenAuthenticator extends AbstractGuardAuthenticator
             return;
         }
         $valid = $this->jwtManager->isValidJwt($jwt);
-        if($valid){
+        if ($valid) {
             $data = $this->jwtManager->getJwtClaim($jwt);
             // if a User object, checkCredentials() is called
             return $this->em->getRepository(User::class)
@@ -64,7 +63,6 @@ class TokenAuthenticator extends AbstractGuardAuthenticator
         }
 
         return;
-        
     }
 
     public function checkCredentials($credentials, UserInterface $user)

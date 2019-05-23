@@ -11,8 +11,8 @@ class ExceptionListener
 {
     public function onKernelException(GetResponseForExceptionEvent $event)
     {
-    	$exception = $event->getException();
-    	$errorTab = ["status" => $exception->getCode(),"message" => $exception->getMessage()];
+        $exception = $event->getException();
+        $errorTab = ["status" => $exception->getCode(),"message" => $exception->getMessage()];
         $response = new Response();
         $response->setContent(json_encode($errorTab));
         if ($exception instanceof HttpExceptionInterface) {

@@ -17,7 +17,6 @@ use Nelmio\ApiDocBundle\Annotation\Model;
 use Nelmio\ApiDocBundle\Annotation\Security;
 use Swagger\Annotations as SWG;
 
-
 /**
  * @Route("/api", name="api_")
  */
@@ -44,7 +43,6 @@ class ApiController extends AbstractController
     */
     public function test(JwtManager $jwtManager)
     {
-        
         return new Response($this->getUser()->getUsername());
     }
 
@@ -57,13 +55,12 @@ class ApiController extends AbstractController
         $user = $this->getDoctrine()
         ->getRepository(User::class)
         ->findBy(['apiKey' => $apiKey]);
-        if($user !== null){
+        if ($user !== null) {
             $data = ["apiKey" => $user[0]->getApiKey()];
             $token = $jwtManager->createJwt($data);
         
             return new Response($token);
         }
-        
     }
 
     /**
@@ -85,7 +82,7 @@ class ApiController extends AbstractController
         $repository = $this->getDoctrine()->getRepository(Product::class);
         $products = $repository->findAll();
         $jsonObject = $serializer->serialize($products, 'json');
-        return new JsonResponse($jsonObject,200,[],true);
+        return new JsonResponse($jsonObject, 200, [], true);
     }
 
 
@@ -104,16 +101,16 @@ class ApiController extends AbstractController
     * @SWG\Tag(name="products")
     * @Security(name="Bearer")
     */
-    public function getProductInfo(SerializerInterface $serializer,$id)
+    public function getProductInfo(SerializerInterface $serializer, $id)
     {
         $repository = $this->getDoctrine()->getRepository(Product::class);
         $product = $repository->find($id);
-        if($product !== null){
+        if ($product !== null) {
             $jsonObject = $serializer->serialize($product, 'json');
-            return new JsonResponse($jsonObject,200,[],true);
+            return new JsonResponse($jsonObject, 200, [], true);
         }
 
-        return new JsonResponse(["error" => "this product doesn't exist"],400);
+        return new JsonResponse(["error" => "this product doesn't exist"], 400);
     }
 
 
@@ -141,14 +138,14 @@ class ApiController extends AbstractController
     {
         $em = $this->getDoctrine()->getManager();
         $repository = $this->getDoctrine()->getRepository(Client::class);
-        $data = json_decode($request->getContent(),true);
-        if( !array_key_exists("username",$data) ){
+        $data = json_decode($request->getContent(), true);
+        if (!array_key_exists("username", $data)) {
             return new JsonResponse(["error" => "username data is missing"]);
         }
 
         $client = $repository->findOneBy(["api" => $this->getUser(), "username" => $data["username"]]);
-        if(null !== $client){
-            return new JsonResponse(["error" => "this username is already taken"],400);
+        if (null !== $client) {
+            return new JsonResponse(["error" => "this username is already taken"], 400);
         }
 
         $client = new Client();
@@ -157,8 +154,7 @@ class ApiController extends AbstractController
         $em->persist($client);
         $em->flush();
 
-        return new JsonResponse(["sucess" => "this user is now register"],201);
-
+        return new JsonResponse(["sucess" => "this user is now register"], 201);
     }
 
 
@@ -176,20 +172,19 @@ class ApiController extends AbstractController
     * @SWG\Tag(name="clients")
     * @Security(name="Bearer")
     */
-    public function removeClient(Request $request,$id)
+    public function removeClient(Request $request, $id)
     {
         $em = $this->getDoctrine()->getManager();
         $repository = $this->getDoctrine()->getRepository(Client::class);
         $client = $repository->findOneBy(["api" => $this->getUser(), "id" => $id]);
-        if(null === $client){
-            return new JsonResponse(["error" => "this user doesn't exist"],400);
+        if (null === $client) {
+            return new JsonResponse(["error" => "this user doesn't exist"], 400);
         }
         
         $em->remove($client);
         $em->flush();
 
-        return new JsonResponse(["sucess" => "this user is now delete"],204);
-
+        return new JsonResponse(["sucess" => "this user is now delete"], 204);
     }
 
 
@@ -213,7 +208,7 @@ class ApiController extends AbstractController
         $clients = $repository->findBy(["api" => $this->getUser()]);
         $jsonObject = $serializer->serialize($clients, 'json');
         
-        return new JsonResponse($jsonObject,200,[],true);
+        return new JsonResponse($jsonObject, 200, [], true);
     }
 
     /**
@@ -231,19 +226,18 @@ class ApiController extends AbstractController
     * @SWG\Tag(name="clients")
     * @Security(name="Bearer")
     */
-    public function clientInfo(SerializerInterface $serializer,$id)
+    public function clientInfo(SerializerInterface $serializer, $id)
     {
         $repository = $this->getDoctrine()->getRepository(Client::class);
         $client = $repository->findOneBy(["id" => $id]);
-        if(null === $client){
-            return new JsonResponse(["error" => "user doesn't exist"],400);
+        if (null === $client) {
+            return new JsonResponse(["error" => "user doesn't exist"], 400);
         }
 
-        if($client->getApi()->getId() !== $this->getUser()->getId()){
-            return new JsonResponse(["error" => "this client doesn't exist in your app"],400);
+        if ($client->getApi()->getId() !== $this->getUser()->getId()) {
+            return new JsonResponse(["error" => "this client doesn't exist in your app"], 400);
         }
 
-        return new JsonResponse($serializer->serialize($client, 'json'),200,[],true);
+        return new JsonResponse($serializer->serialize($client, 'json'), 200, [], true);
     }
-
 }
