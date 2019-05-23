@@ -11,8 +11,8 @@ use App\Entity\Product;
 use App\Entity\Client;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use App\Service\JwtManager;
-use App\Service\EncoderJson;
 use JMS\Serializer\SerializerInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 
 /**
@@ -66,13 +66,12 @@ class ApiController extends AbstractController
     /**
     *@Route("/products", name="getallproduct", methods={"GET"})
     */
-    public function getAllProducts(SerializerInterface $serializer,EncoderJson $encoderJson)
+    public function getAllProducts(SerializerInterface $serializer)
     {
         $repository = $this->getDoctrine()->getRepository(Product::class);
         $products = $repository->findAll();
         $jsonObject = $serializer->serialize($products, 'json');
-        
-        return new Response($jsonObject);
+        return new JsonResponse($jsonObject,202,[],true);
     }
 
 
@@ -80,16 +79,16 @@ class ApiController extends AbstractController
     *@Route("/products/{id}", name="product_get", methods={"GET"})
     *
     */
-    public function getProductInfo(EncoderJson $encoderJson,$id)
+    public function getProductInfo(SerializerInterface $serializer,$id)
     {
         $repository = $this->getDoctrine()->getRepository(Product::class);
         $product = $repository->find($id);
         if($product !== null){
-            $jsonObject = $encoderJson->encodeData($product);
-            return new Response($jsonObject);
+            $jsonObject = $serializer->serialize($product, 'json');
+            return new JsonResponse($jsonObject,202,[],true);
         }
 
-        return new Response(json_encode(["error" => "this product doesn't exist"]));
+        return new JsonResponse(["error" => "this product doesn't exist"]);
     }
 
 
@@ -102,12 +101,12 @@ class ApiController extends AbstractController
         $repository = $this->getDoctrine()->getRepository(Client::class);
         $data = json_decode($request->getContent(),true);
         if( !array_key_exists("username",$data) ){
-            return new Response(json_encode(["error" => "username data is missing"]));
+            return new JsonResponse(["error" => "username data is missing"]);
         }
 
         $client = $repository->findOneBy(["api" => $this->getUser(), "username" => $data["username"]]);
         if(null !== $client){
-            return new Response(json_encode(["error" => "this username is already taken"]));
+            return new JsonResponse(["error" => "this username is already taken"]);
         }
 
         $client = new Client();
@@ -116,7 +115,7 @@ class ApiController extends AbstractController
         $em->persist($client);
         $em->flush();
 
-        return new Response(json_encode(["sucess" => "this user is now register"]));
+        return new JsonResponse(["sucess" => "this user is now register"]);
 
     }
 
@@ -130,13 +129,13 @@ class ApiController extends AbstractController
         $repository = $this->getDoctrine()->getRepository(Client::class);
         $client = $repository->findOneBy(["api" => $this->getUser(), "id" => $id]);
         if(null === $client){
-            return new Response(json_encode(["error" => "this user doesn't exist"]));
+            return new JsonResponse(["error" => "this user doesn't exist"],202);
         }
         
         $em->remove($client);
         $em->flush();
 
-        return new Response(json_encode(["sucess" => "this user is now delete"]));
+        return new JsonResponse(["sucess" => "this user is now delete"],202);
 
     }
 
@@ -144,26 +143,27 @@ class ApiController extends AbstractController
     /**
     *@Route("/clients", name="client", methods={"GET"})
     */
-    public function getClients(SerializerInterface $serializer,EncoderJson $encoderJson)
+    public function getClients(SerializerInterface $serializer)
     {
         $repository = $this->getDoctrine()->getRepository(Client::class);
         $clients = $repository->findBy(["api" => $this->getUser()]);
         $jsonObject = $serializer->serialize($clients, 'json');
-        return new Response($jsonObject);
+        
+        return new JsonResponse($jsonObject,202,[],true);
     }
 
     /**
     *@Route("/clients/{id}", name="client_get" , methods={"GET"})
     */
-    public function clientInfo(EncoderJson $encoderJson,$id)
+    public function clientInfo(SerializerInterface $serializer,$id)
     {
         $repository = $this->getDoctrine()->getRepository(Client::class);
         $client = $repository->findOneBy(["id" => $id]);
         if(null === $client){
-            return new Response(json_encode(["error" => "user doesn't exist"]));
+            return new JsonResponse(["error" => "user doesn't exist"],204);
         }
 
-        return new Response($encoderJson->encodeData($client));
+        return new JsonResponse($serializer->serialize($client, 'json'),202,[],true);
     }
 
 }

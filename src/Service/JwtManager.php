@@ -25,9 +25,7 @@ class JwtManager
     {
         $signer = new Sha256();
         $keychain = new Keychain();
-
         $token = (new Builder())->setIssuedAt(time()); // Configures the time that the token was issued (iat claim)
-
         foreach($data as $key => $value) {
             $token->set($key,$value);        
         }
@@ -50,11 +48,9 @@ class JwtManager
     public function isValidJwt($jwt){
         $token = $this->decodeJwt($jwt);
         $valid = false;
-
         if($this->verifySignature($token)){
             $valid = true;
         }
-
         return $valid;
     }
 
