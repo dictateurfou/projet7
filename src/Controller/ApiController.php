@@ -71,7 +71,7 @@ class ApiController extends AbstractController
         $repository = $this->getDoctrine()->getRepository(Product::class);
         $products = $repository->findAll();
         $jsonObject = $serializer->serialize($products, 'json');
-        return new JsonResponse($jsonObject,202,[],true);
+        return new JsonResponse($jsonObject,200,[],true);
     }
 
 
@@ -85,10 +85,10 @@ class ApiController extends AbstractController
         $product = $repository->find($id);
         if($product !== null){
             $jsonObject = $serializer->serialize($product, 'json');
-            return new JsonResponse($jsonObject,202,[],true);
+            return new JsonResponse($jsonObject,200,[],true);
         }
 
-        return new JsonResponse(["error" => "this product doesn't exist"]);
+        return new JsonResponse(["error" => "this product doesn't exist"],400);
     }
 
 
@@ -106,7 +106,7 @@ class ApiController extends AbstractController
 
         $client = $repository->findOneBy(["api" => $this->getUser(), "username" => $data["username"]]);
         if(null !== $client){
-            return new JsonResponse(["error" => "this username is already taken"]);
+            return new JsonResponse(["error" => "this username is already taken"],400);
         }
 
         $client = new Client();
@@ -115,7 +115,7 @@ class ApiController extends AbstractController
         $em->persist($client);
         $em->flush();
 
-        return new JsonResponse(["sucess" => "this user is now register"]);
+        return new JsonResponse(["sucess" => "this user is now register"],201);
 
     }
 
@@ -129,13 +129,13 @@ class ApiController extends AbstractController
         $repository = $this->getDoctrine()->getRepository(Client::class);
         $client = $repository->findOneBy(["api" => $this->getUser(), "id" => $id]);
         if(null === $client){
-            return new JsonResponse(["error" => "this user doesn't exist"],202);
+            return new JsonResponse(["error" => "this user doesn't exist"],400);
         }
         
         $em->remove($client);
         $em->flush();
 
-        return new JsonResponse(["sucess" => "this user is now delete"],202);
+        return new JsonResponse(["sucess" => "this user is now delete"],200);
 
     }
 
@@ -149,7 +149,7 @@ class ApiController extends AbstractController
         $clients = $repository->findBy(["api" => $this->getUser()]);
         $jsonObject = $serializer->serialize($clients, 'json');
         
-        return new JsonResponse($jsonObject,202,[],true);
+        return new JsonResponse($jsonObject,200,[],true);
     }
 
     /**
@@ -160,10 +160,10 @@ class ApiController extends AbstractController
         $repository = $this->getDoctrine()->getRepository(Client::class);
         $client = $repository->findOneBy(["id" => $id]);
         if(null === $client){
-            return new JsonResponse(["error" => "user doesn't exist"],204);
+            return new JsonResponse(["error" => "user doesn't exist"],400);
         }
 
-        return new JsonResponse($serializer->serialize($client, 'json'),202,[],true);
+        return new JsonResponse($serializer->serialize($client, 'json'),200,[],true);
     }
 
 }
