@@ -8,7 +8,9 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use App\Entity\User;
 use App\Entity\Product;
+use App\Repository\ProductRepository;
 use App\Entity\Client;
+use App\Repository\ClientRepository;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use App\Service\JwtManager;
 use JMS\Serializer\SerializerInterface;
@@ -77,12 +79,12 @@ class ApiController extends AbstractController
     * @SWG\Tag(name="products")
     * @Security(name="Bearer")
     */
-    public function getAllProducts(SerializerInterface $serializer)
+    public function getAllProducts(SerializerInterface $serializer,ProductRepository $repository)
     {
-        $repository = $this->getDoctrine()->getRepository(Product::class);
         $products = $repository->findAll();
         $jsonObject = $serializer->serialize($products, 'json');
-        return new JsonResponse($jsonObject, 200, [], true);
+        return (new JsonResponse($jsonObject, 200, [], true))
+        ->setSharedMaxAge(3600);
     }
 
 
@@ -101,13 +103,13 @@ class ApiController extends AbstractController
     * @SWG\Tag(name="products")
     * @Security(name="Bearer")
     */
-    public function getProductInfo(SerializerInterface $serializer, $id)
+    public function getProductInfo(SerializerInterface $serializer, $id,ProductRepository $repository)
     {
-        $repository = $this->getDoctrine()->getRepository(Product::class);
         $product = $repository->find($id);
         if ($product !== null) {
             $jsonObject = $serializer->serialize($product, 'json');
-            return new JsonResponse($jsonObject, 200, [], true);
+            return (new JsonResponse($jsonObject, 200, [], true))
+            ->setSharedMaxAge(3600);
         }
 
         return new JsonResponse(["error" => "this product doesn't exist"], 400);
@@ -134,10 +136,9 @@ class ApiController extends AbstractController
     * @SWG\Tag(name="clients")
     * @Security(name="Bearer")
     */
-    public function addClient(Request $request)
+    public function addClient(Request $request,ClientRepository $repository)
     {
         $em = $this->getDoctrine()->getManager();
-        $repository = $this->getDoctrine()->getRepository(Client::class);
         $data = json_decode($request->getContent(), true);
         if (!array_key_exists("username", $data)) {
             return new JsonResponse(["error" => "username data is missing"]);
@@ -172,10 +173,9 @@ class ApiController extends AbstractController
     * @SWG\Tag(name="clients")
     * @Security(name="Bearer")
     */
-    public function removeClient(Request $request, $id)
+    public function removeClient(Request $request, ClientRepository $repository, $id)
     {
         $em = $this->getDoctrine()->getManager();
-        $repository = $this->getDoctrine()->getRepository(Client::class);
         $client = $repository->findOneBy(["api" => $this->getUser(), "id" => $id]);
         if (null === $client) {
             return new JsonResponse(["error" => "this user doesn't exist"], 400);
@@ -202,13 +202,13 @@ class ApiController extends AbstractController
     * @SWG\Tag(name="clients")
     * @Security(name="Bearer")
     */
-    public function getClients(SerializerInterface $serializer)
+    public function getClients(SerializerInterface $serializer,ClientRepository $repository)
     {
-        $repository = $this->getDoctrine()->getRepository(Client::class);
         $clients = $repository->findBy(["api" => $this->getUser()]);
         $jsonObject = $serializer->serialize($clients, 'json');
         
-        return new JsonResponse($jsonObject, 200, [], true);
+        return (new JsonResponse($jsonObject, 200, [], true))
+        ->setSharedMaxAge(3600);
     }
 
     /**
@@ -226,9 +226,8 @@ class ApiController extends AbstractController
     * @SWG\Tag(name="clients")
     * @Security(name="Bearer")
     */
-    public function clientInfo(SerializerInterface $serializer, $id)
+    public function clientInfo(SerializerInterface $serializer, ClientRepository $repository, $id)
     {
-        $repository = $this->getDoctrine()->getRepository(Client::class);
         $client = $repository->findOneBy(["id" => $id]);
         if (null === $client) {
             return new JsonResponse(["error" => "user doesn't exist"], 400);
@@ -237,7 +236,10 @@ class ApiController extends AbstractController
         if ($client->getApi()->getId() !== $this->getUser()->getId()) {
             return new JsonResponse(["error" => "this client doesn't exist in your app"], 400);
         }
+        
+        $response = (new JsonResponse($serializer->serialize($client, 'json'), 200, [], true))
+        ->setSharedMaxAge(3600);
 
-        return new JsonResponse($serializer->serialize($client, 'json'), 200, [], true);
+        return $response;
     }
 }
