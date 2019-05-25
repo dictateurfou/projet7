@@ -1,4 +1,4 @@
-##installation
+## installation
 1) configure you bdd in .env (DATABASE_URL)
 2) open you console in root folder.
 3) type : composer install
@@ -10,13 +10,13 @@
 9) openssl rsa -pubout -in config/jwt/private.pem -out config/jwt/public.pem
 10) change you secret phrase in config/service.yaml (App\Service\JwtManager:)
 
-#for get You Bearrer token
+# for get You Bearrer token
 1) go in database and select user 
 2) copy api_key for user test
 3) go to http://localhost:8000/getJwt/{apiKey}
 
-#optional
+# optional
 if you need to create new user you have api/register route (send with form-data username and password)
 
-#doc link
+# doc link
 go in http://localhost:8000/api/doc for api documentation
