@@ -1,4 +1,4 @@
-#installation
+##installation
 1) configure you bdd in .env (DATABASE_URL)
 2) open you console in root folder.
 3) type : composer install
