@@ -6,6 +6,8 @@ use Doctrine\ORM\Mapping as ORM;
 use Hateoas\Configuration\Annotation as Hateoas;
 use JMS\Serializer\Annotation\ExclusionPolicy;
 use JMS\Serializer\Annotation\Expose;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
 * @ORM\Entity(repositoryClass="App\Repository\ClientRepository")
@@ -17,7 +19,13 @@ use JMS\Serializer\Annotation\Expose;
 *          parameters = { "id" = "expr(object.getId())" }
 *      )
 * )
+* @UniqueEntity(
+*     fields={"api", "username"},
+*     errorPath="username",
+*     message="username is already taken"
+* )
 */
+
 class Client
 {
     /**
@@ -31,6 +39,8 @@ class Client
     /**
      * @ORM\Column(type="string", length=255)
      * @Expose
+     * @Assert\NotBlank
+     * @Assert\Length(min=3)
      */
     private $username;
 

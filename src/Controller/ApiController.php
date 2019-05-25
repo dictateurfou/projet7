@@ -18,6 +18,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use Nelmio\ApiDocBundle\Annotation\Security;
 use Swagger\Annotations as SWG;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 /**
  * @Route("/api", name="api_")
@@ -136,7 +137,7 @@ class ApiController extends AbstractController
     * @SWG\Tag(name="clients")
     * @Security(name="Bearer")
     */
-    public function addClient(Request $request,ClientRepository $repository)
+    public function addClient(Request $request,ClientRepository $repository,ValidatorInterface $validator)
     {
         $em = $this->getDoctrine()->getManager();
         $data = json_decode($request->getContent(), true);
@@ -145,13 +146,22 @@ class ApiController extends AbstractController
         }
 
         $client = $repository->findOneBy(["api" => $this->getUser(), "username" => $data["username"]]);
-        if (null !== $client) {
-            return new JsonResponse(["error" => "this username is already taken"], 400);
-        }
+        
 
         $client = new Client();
         $client->setUsername($data["username"]);
         $client->setApi($this->getUser());
+        $errors = $validator->validate($client);
+
+        if (count($errors) > 0) {
+            $errorTab = ["error" => []];
+            foreach ($errors as $key => $value) {
+                
+                $errorTab["error"][$key] = $value->getMessage();
+            }
+            return new JsonResponse($errorTab,400);
+        }
+
         $em->persist($client);
         $em->flush();
 
@@ -228,13 +238,9 @@ class ApiController extends AbstractController
     */
     public function clientInfo(SerializerInterface $serializer, ClientRepository $repository, $id)
     {
-        $client = $repository->findOneBy(["id" => $id]);
+        $client = $repository->findOneBy(["id" => $id,"api" => $this->getUser()]);
         if (null === $client) {
             return new JsonResponse(["error" => "user doesn't exist"], 400);
-        }
-
-        if ($client->getApi()->getId() !== $this->getUser()->getId()) {
-            return new JsonResponse(["error" => "this client doesn't exist in your app"], 400);
         }
         
         $response = (new JsonResponse($serializer->serialize($client, 'json'), 200, [], true))
