@@ -80,7 +80,7 @@ class ApiController extends AbstractController
     * @SWG\Tag(name="products")
     * @Security(name="Bearer")
     */
-    public function getAllProducts(SerializerInterface $serializer,ProductRepository $repository)
+    public function getAllProducts(SerializerInterface $serializer, ProductRepository $repository)
     {
         $products = $repository->findAll();
         $jsonObject = $serializer->serialize($products, 'json');
@@ -104,7 +104,7 @@ class ApiController extends AbstractController
     * @SWG\Tag(name="products")
     * @Security(name="Bearer")
     */
-    public function getProductInfo(SerializerInterface $serializer, $id,ProductRepository $repository)
+    public function getProductInfo(SerializerInterface $serializer, $id, ProductRepository $repository)
     {
         $product = $repository->find($id);
         if ($product !== null) {
@@ -137,7 +137,7 @@ class ApiController extends AbstractController
     * @SWG\Tag(name="clients")
     * @Security(name="Bearer")
     */
-    public function addClient(Request $request,ClientRepository $repository,ValidatorInterface $validator)
+    public function addClient(Request $request, ClientRepository $repository, ValidatorInterface $validator)
     {
         $em = $this->getDoctrine()->getManager();
         $data = json_decode($request->getContent(), true);
@@ -156,10 +156,9 @@ class ApiController extends AbstractController
         if (count($errors) > 0) {
             $errorTab = ["error" => []];
             foreach ($errors as $key => $value) {
-                
                 $errorTab["error"][$key] = $value->getMessage();
             }
-            return new JsonResponse($errorTab,400);
+            return new JsonResponse($errorTab, 400);
         }
 
         $em->persist($client);
@@ -212,7 +211,7 @@ class ApiController extends AbstractController
     * @SWG\Tag(name="clients")
     * @Security(name="Bearer")
     */
-    public function getClients(SerializerInterface $serializer,ClientRepository $repository)
+    public function getClients(SerializerInterface $serializer, ClientRepository $repository)
     {
         $clients = $repository->findBy(["api" => $this->getUser()]);
         $jsonObject = $serializer->serialize($clients, 'json');
