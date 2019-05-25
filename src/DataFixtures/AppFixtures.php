@@ -35,7 +35,6 @@ class AppFixtures extends Fixture
         $user->setApiKey(rtrim(strtr(base64_encode(random_bytes(32)), '+/', '-_'), '='));
         $manager->persist($user);
 
-
         for ($i = 0; $i < 20; $i++) {
             $client = new Client();
             $client->setUsername('product '.$i);
