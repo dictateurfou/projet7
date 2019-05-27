@@ -20,3 +20,5 @@ if you need to create new user you have api/register route (send with form-data 
 
 ### doc link
 go in http://localhost:8000/api/doc for api documentation
+
+[![SymfonyInsight](https://insight.symfony.com/projects/4b53b5de-f6b6-4c39-a617-dd9385cffabc/big.svg)](https://insight.symfony.com/projects/4b53b5de-f6b6-4c39-a617-dd9385cffabc)
